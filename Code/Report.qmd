@@ -1,0 +1,365 @@
+---
+title: "Analysis"
+author: "Tom Mushkat"
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+editor: visual
+---
+
+```{r,warning=FALSE,message=FALSE}
+
+pacman::p_load(here, doSPSS, skimr, tidyverse, psych, ez)
+
+Data <- read_csv(here("Data\\data_to_analyze.csv"))
+
+```
+
+# METI
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$METI_overall, Data$Condition)
+
+
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = METI_overall
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+ezANOVA_with_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = METI_overall
+        , between = Condition
+        , between_covariates = .(val_expert_knowledge)
+        , type = '3'
+        , return_aov = TRUE)
+
+
+```
+
+## Descriptive statistics + Figure
+
+In the figure we can see the Mean and the 95% CI.
+
+```{r,warning=FALSE,message=FALSE}
+doSPSS_model$Descriptive_Statistics
+
+Data %>% 
+    ggplot(aes(x = Condition, y = METI_overall, fill = Condition)) +
+geom_violin(alpha = 0) +
+   ggplot2::stat_summary(fun.data = "mean_cl_normal", conf.int = .95, geom = "errorbar", color = "red", width = 0.2, size = 1, position = position_dodge(0.9)) +
+    ggplot2::stat_summary(fun = mean, geom = "bar", alpha = 0.2, position = position_dodge(0.9)) +
+    # ggplot2::ylab('METI')  +
+    ggplot2::theme_bw() +
+  ylim(1, 10) +
+  scale_y_continuous(breaks = seq(from = 1, to = 10, by = 1)) +
+  theme(axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15)
+        )
+```
+
+## Anova
+
+### Anova without covariates
+
+The model is marginally significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_no_cov$ANOVA
+```
+
+### Anova with the validation questions as a covariate
+
+The model is significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_with_cov$ANOVA
+```
+
+## Specific contrasts
+
+```{r,warning=FALSE,message=FALSE}
+postHoc(Data$METI_overall, Data$Condition)
+```
+
+# Expertise
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Expertise, Data$Condition)
+
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Expertise
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+ezANOVA_with_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Expertise
+        , between = Condition
+        , between_covariates = .(val_expert_knowledge)
+        , type = '3'
+        , return_aov = TRUE)
+
+
+```
+
+## Descriptive statistics + Figure
+
+In the figure we can see the Mean and the 95% CI.
+
+```{r,warning=FALSE,message=FALSE}
+doSPSS_model$Descriptive_Statistics
+
+Data %>% 
+    ggplot(aes(x = Condition, y = Expertise, fill = Condition)) +
+geom_violin(alpha = 0) +
+   ggplot2::stat_summary(fun.data = "mean_cl_normal", conf.int = .95, geom = "errorbar", color = "red", width = 0.2, size = 1, position = position_dodge(0.9)) +
+    ggplot2::stat_summary(fun = mean, geom = "bar", alpha = 0.2, position = position_dodge(0.9)) +
+    # ggplot2::ylab('METI')  +
+    ggplot2::theme_bw() +
+  ylim(1, 10) +
+  scale_y_continuous(breaks = seq(from = 1, to = 10, by = 1)) +
+  theme(axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15)
+        )
+```
+
+## Anova
+
+### Anova without covariates
+
+The model is marginally significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_no_cov$ANOVA
+```
+
+### Anova with the validation questions as a covariate
+
+The model is significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_with_cov$ANOVA
+```
+
+## Specific contrasts
+
+This is the multiple pairwise with a correction for p. I also did separate t-tests because we suggested it in the pre-registration. However, the t-tests results did not reveal different results so I did not included them.
+
+As you can see the difference between the two conditions of the IDK is significant, but the differences between the Know and the other IDK is not.
+
+In specific t.tests (non-adjusted p), the p for the IDK_reason-IDK_no_reason comparison is 0.02 and the p for the Know-IDK_reason comparison is 0.09.
+
+```{r,warning=FALSE,message=FALSE}
+postHoc(Data$Expertise, Data$Condition)
+
+ezANOVA(data = Data[Data$Condition != 'IDK_no_reason', ], wid = prolific_ID, dv = Expertise
+        , between = Condition
+        , between_covariates = .(val_expert_knowledge)
+        , type = '3'
+        , return_aov = TRUE)
+
+ezANOVA(data = Data[Data$Condition != 'IDK_reason', ], wid = prolific_ID, dv = Expertise
+        , between = Condition
+        , between_covariates = .(val_expert_knowledge)
+        , type = '3'
+        , return_aov = TRUE)
+
+```
+
+# Integrity
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Integrity, Data$Condition)
+
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Integrity
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+ezANOVA_with_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Integrity
+        , between = Condition
+        , between_covariates = .(val_expert_knowledge)
+        , type = '3'
+        , return_aov = TRUE)
+
+
+```
+
+## Descriptive statistics + Figure
+
+In the figure we can see the Mean and the 95% CI.
+
+```{r,warning=FALSE,message=FALSE}
+doSPSS_model$Descriptive_Statistics
+
+Data %>% 
+    ggplot(aes(x = Condition, y = Integrity, fill = Condition)) +
+geom_violin(alpha = 0) +
+   ggplot2::stat_summary(fun.data = "mean_cl_normal", conf.int = .95, geom = "errorbar", color = "red", width = 0.2, size = 1, position = position_dodge(0.9)) +
+    ggplot2::stat_summary(fun = mean, geom = "bar", alpha = 0.2, position = position_dodge(0.9)) +
+    # ggplot2::ylab('METI')  +
+    ggplot2::theme_bw() +
+  ylim(1, 10) +
+  scale_y_continuous(breaks = seq(from = 1, to = 10, by = 1)) +
+  theme(axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15)
+        )
+```
+
+## Anova
+
+### Anova without covariates
+
+The model is significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_no_cov$ANOVA
+```
+
+### Anova with the validation questions as a covariate
+
+The model is significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_with_cov$ANOVA
+```
+
+## Specific contrasts
+
+```{r,warning=FALSE,message=FALSE}
+postHoc(Data$Integrity, Data$Condition)
+```
+
+# Benevolence
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Benevolence, Data$Condition)
+
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Benevolence
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+```
+
+## Descriptive statistics + Figure
+
+In the figure we can see the Mean and the 95% CI.
+
+```{r,warning=FALSE,message=FALSE}
+doSPSS_model$Descriptive_Statistics
+
+Data %>% 
+    ggplot(aes(x = Condition, y = Benevolence, fill = Condition)) +
+geom_violin(alpha = 0) +
+   ggplot2::stat_summary(fun.data = "mean_cl_normal", conf.int = .95, geom = "errorbar", color = "red", width = 0.2, size = 1, position = position_dodge(0.9)) +
+    ggplot2::stat_summary(fun = mean, geom = "bar", alpha = 0.2, position = position_dodge(0.9)) +
+    # ggplot2::ylab('METI')  +
+    ggplot2::theme_bw() +
+  ylim(1, 10) +
+  scale_y_continuous(breaks = seq(from = 1, to = 10, by = 1)) +
+  theme(axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15)
+        )
+```
+
+## Anova
+
+### Anova without covariates
+
+The model is significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_no_cov$ANOVA
+```
+
+## Specific contrasts
+
+```{r,warning=FALSE,message=FALSE}
+postHoc(Data$Benevolence, Data$Condition)
+```
+
+# Compliance
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Compliance, Data$Condition)
+
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Compliance
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+```
+
+## Descriptive statistics + Figure
+
+In the figure we can see the Mean and the 95% CI.
+
+```{r,warning=FALSE,message=FALSE}
+doSPSS_model$Descriptive_Statistics
+
+Data %>% 
+    ggplot(aes(x = Condition, y = Compliance, fill = Condition)) +
+geom_violin(alpha = 0) +
+   ggplot2::stat_summary(fun.data = "mean_cl_normal", conf.int = .95, geom = "errorbar", color = "red", width = 0.2, size = 1, position = position_dodge(0.9)) +
+    ggplot2::stat_summary(fun = mean, geom = "bar", alpha = 0.2, position = position_dodge(0.9)) +
+    # ggplot2::ylab('METI')  +
+    ggplot2::theme_bw() +
+  ylim(1, 10) +
+  scale_y_continuous(breaks = seq(from = 1, to = 10, by = 1)) +
+  theme(axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        axis.title.y = element_text(size = 15),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15)
+        )
+```
+
+## Anova
+
+### Anova without covariates
+
+The model is significant
+
+```{r,warning=FALSE,message=FALSE}
+ezANOVA_no_cov$ANOVA
+```
+
+## Specific contrasts
+
+```{r,warning=FALSE,message=FALSE}
+postHoc(Data$Compliance, Data$Condition)
+```

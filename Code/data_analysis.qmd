@@ -1,0 +1,268 @@
+---
+title: "Analysis"
+author: "Tom Mushkat"
+format: html
+editor: visual
+---
+
+
+```{r,warning=FALSE,message=FALSE}
+
+pacman::p_load(here, doSPSS, skimr, tidyverse, psych, ez)
+
+Data <- read_csv(here("Data\\data_to_analyze.csv"))
+
+```
+
+```{r,warning=FALSE,message=FALSE}
+
+
+Data %>% 
+  select(METI_1, METI_2, METI_3, METI_4, METI_5, METI_6) %>% 
+  psych::alpha()
+
+Data %>% 
+  select(METI_7, METI_8, METI_9, METI_10) %>% 
+  psych::alpha()
+
+Data %>% 
+  select(METI_11, METI_12, METI_13, METI_14, METI_15, METI_16) %>% 
+  psych::alpha()
+
+Data %>% 
+  select(valExpert, vlaKnowledge) %>% 
+  psych::alpha()
+
+```
+
+
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Expertise, Data$Condition)
+cor.test(Data$Age, Data$Expertise)
+cor.test(Data$val_expert_knowledge, Data$Expertise)
+indttest(Data$Expertise[Data$Gender != 'Other'], Data$Gender[Data$Gender != 'Other'])
+
+oneWayAnova(Data$Age, Data$Condition)
+oneWayAnova(Data$val_expert_knowledge, Data$Condition)
+
+
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Expertise
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+ezANOVA_with_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Expertise
+        , between = Condition
+        , between_covariates = .(val_expert_knowledge)
+        , type = '3'
+        , return_aov = TRUE)
+
+
+
+not_Know_model <- 
+indttest(Data$Expertise[Data$Condition != 'Know']
+         , Data$Condition[Data$Condition != 'Know'])
+
+not_no_reason_model <- 
+indttest(Data$Expertise[Data$Condition != 'IDK_no_reason']
+         , Data$Condition[Data$Condition != 'IDK_no_reason'])
+
+not_reason_model <- 
+indttest(Data$Expertise[Data$Condition != 'IDK_reason']
+         , Data$Condition[Data$Condition != 'IDK_reason'])
+
+
+postHoc(Data$Expertise, Data$Condition)
+
+
+```
+
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Integrity, Data$Condition)
+cor.test(Data$Age, Data$Integrity)
+cor.test(Data$val_expert_knowledge, Data$Integrity)
+indttest(Data$Integrity[Data$Gender != 'Other'], Data$Gender[Data$Gender != 'Other'])
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Integrity
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+ezANOVA_with_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Integrity
+        , between = Condition
+        , between_covariates = .(val_expert_knowledge)
+        , type = '3'
+        , return_aov = TRUE)
+
+
+
+not_Know_model <- 
+indttest(Data$Integrity[Data$Condition != 'Know']
+         , Data$Condition[Data$Condition != 'Know'])
+
+not_no_reason_model <- 
+indttest(Data$Integrity[Data$Condition != 'IDK_no_reason']
+         , Data$Condition[Data$Condition != 'IDK_no_reason'])
+
+not_reason_model <- 
+indttest(Data$Integrity[Data$Condition != 'IDK_reason']
+         , Data$Condition[Data$Condition != 'IDK_reason'])
+
+
+
+
+```
+
+
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Benevolence, Data$Condition)
+cor.test(Data$Age, Data$Benevolence)
+cor.test(Data$val_expert_knowledge, Data$Benevolence)
+indttest(Data$Benevolence[Data$Gender != 'Other'], Data$Gender[Data$Gender != 'Other'])
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Benevolence
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+
+not_Know_model <- 
+indttest(Data$Benevolence[Data$Condition != 'Know']
+         , Data$Condition[Data$Condition != 'Know'])
+
+not_no_reason_model <- 
+indttest(Data$Benevolence[Data$Condition != 'IDK_no_reason']
+         , Data$Condition[Data$Condition != 'IDK_no_reason'])
+
+not_reason_model <- 
+indttest(Data$Benevolence[Data$Condition != 'IDK_reason']
+         , Data$Condition[Data$Condition != 'IDK_reason'])
+
+
+
+
+```
+
+
+
+```{r,warning=FALSE,message=FALSE}
+
+doSPSS_model <- oneWayAnova(Data$Compliance, Data$Condition)
+cor.test(Data$Age, Data$Compliance)
+cor.test(Data$val_expert_knowledge, Data$Compliance)
+indttest(Data$Compliance[Data$Gender != 'Other'], Data$Gender[Data$Gender != 'Other'])
+
+ezANOVA_no_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Compliance
+        , between = Condition
+        , type = '3'
+        , return_aov = TRUE)
+
+ezANOVA_with_cov <- 
+ezANOVA(data = Data, wid = prolific_ID, dv = Compliance
+        , between = Condition
+        , between_covariates = .(Age)
+        , type = '3'
+        , return_aov = TRUE)
+
+
+
+not_Know_model <- 
+indttest(Data$Compliance[Data$Condition != 'Know']
+         , Data$Condition[Data$Condition != 'Know'])
+
+not_no_reason_model <- 
+indttest(Data$Compliance[Data$Condition != 'IDK_no_reason']
+         , Data$Condition[Data$Condition != 'IDK_no_reason'])
+
+not_reason_model <- 
+indttest(Data$Compliance[Data$Condition != 'IDK_reason']
+         , Data$Condition[Data$Condition != 'IDK_reason'])
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+doSPSS_model$Descriptive_Statistics
+
+Data %>% 
+    ggplot(aes(x = Condition, y = Expertise, fill = Condition)) +
+geom_violin(alpha = 0) +
+   ggplot2::stat_summary(fun.data = "mean_cl_normal", conf.int = .95, geom = "errorbar", color = "red", width = 0.2, size = 1, position = position_dodge(0.9)) +
+    ggplot2::stat_summary(fun = mean, geom = "bar", alpha = 0.2, position = position_dodge(0.9)) +
+    # ggplot2::ylab('METI')  +
+    ggplot2::theme_bw() +
+  ylim(1, 10) +
+  scale_y_continuous(breaks = seq(from = 1, to = 10, by = 1)) +
+  theme(axis.text.x = element_text(size = 30),
+        axis.text.y = element_text(size = 30),
+        axis.title.x = element_text(size = 30),
+        axis.title.y = element_text(size = 30),
+        legend.text = element_text(size = 30),
+        legend.title = element_text(size = 30)
+        )
+contrasts(as.factor(Data$Condition))
+not_Know <- cbind(c(-1, 1, 0), c(0.5, 0.5, -1))
+not_no_reason <- cbind(c(0, 1, -1), c(1, -0.5, -0.5))
+not_reason <-  cbind(c(-1, 0, 1), c(0.5, -1, 0.5))
+
+Data <- Data %>% 
+  mutate(not_Know = as_factor(Condition)
+         , not_no_reason = as_factor(Condition)
+         , not_reason = as_factor(Condition))
+
+levels(Data$not_Know) <- not_Know
+levels(Data$not_no_reason) <- not_no_reason
+levels(Data$not_reason) <- not_reason
+
+contrasts_not_Know <- aov(Expertise ~ not_Know, data = Data) %>% 
+  summary.lm()
+contrasts_not_no_reason <- aov(Expertise ~ not_no_reason, data = Data) %>%
+  summary.lm()
+contrasts_not_reason <- aov(Expertise ~ not_reason, data = Data) %>% 
+  summary.lm()
+
+
+
+ezANOVA_no_cov$ANOVA
+ezANOVA_with_cov$ANOVA
+
+not_Know_model$Model_summary
+not_Know_model$Effect_size
+
+not_no_reason_model$Model_summary
+not_no_reason_model$Effect_size
+
+not_reason_model$Model_summary
+not_reason_model$Effect_size
+
+```
+

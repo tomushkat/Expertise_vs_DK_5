@@ -1,0 +1,72 @@
+---
+title: "Data processing"
+format: html
+editor: visual
+---
+
+```{r,warning=FALSE,message=FALSE}
+
+pacman::p_load(here, doSPSS, tidyverse)
+
+data_to_process <- read_csv(here("Data\\data_for_processing.csv"))
+
+```
+
+
+```{r,warning=FALSE,message=FALSE}
+
+convert_meti <- function(data) {
+  
+  data_1 <- case_when (
+    
+      data == '1\nNot at all' ~ 1
+     , data == '7\nVery much' ~ 7
+     , T ~ as.numeric(data)
+    
+    )
+  
+  return(data_1)
+}
+
+data_to_process_1 <- 
+  data_to_process %>% 
+    mutate(duration_minutes = Duration_seconds / 60) %>% 
+  filter(Attention           == 'Maybe'
+         , Honesty           == 'Yes, I put in a reasonable effort'
+         , participateBefore == 'No'
+         , Consecutively     == 'Yes'
+         , Disturbances      == 'No'
+         , Alone             == 'Alone') %>% 
+   mutate(clean_duration = sdOutliers(duration_minutes)) %>% 
+    drop_na(clean_duration)
+
+data_to_analyze <- data_to_process_1 %>% 
+  mutate(across(c(METI_1:METI_16
+                    , valExpert
+                    , vlaKnowledge), convert_meti)
+          , Compliance = case_when (
+                             Compliance   == '1\nVery low' ~ 1
+                             , Compliance == '7\nVery high' ~ 7
+                             , T ~ as.numeric(Compliance)
+                          )
+         ) %>% 
+         mutate(METI_overall =  rowMeans(cbind(METI_1, METI_2, METI_3, METI_4, METI_5,
+                                        METI_6, METI_7, METI_8, METI_9, METI_10,
+                                        METI_11, METI_12, METI_13, METI_14, METI_15, METI_16))
+                , Expertise = rowMeans(cbind(METI_1, METI_2, METI_3,
+                                   METI_4, METI_4, METI_6))
+                , Integrity = rowMeans(cbind(METI_7, METI_8, METI_9,
+                                    METI_10))
+                , Benevolence = rowMeans(cbind(METI_11, METI_12, METI_13,
+                                    METI_14, METI_15, METI_16))
+                , val_expert_knowledge = rowMeans(cbind(valExpert, vlaKnowledge))
+         )
+
+
+
+write.csv(data_to_analyze, 'data_to_analyze.csv')
+
+```
+
+
+
